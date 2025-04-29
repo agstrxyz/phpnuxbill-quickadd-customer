@@ -83,6 +83,27 @@
                             </select>
                         </div>
                     </div>
+                    <div class="panel-heading"></div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{Lang::T('Send Welcome Message')}</label>
+                            <div class="col-md-9">
+                                <label class="switch">
+                                    <input type="checkbox" id="send_welcome_message" value="1" name="send_welcome_message">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="method" style="display: none;">
+                            <label class="col-md-3 control-label">{Lang::T('Method')}</label>
+                            <label class="col-md-3 control-label"><input type="checkbox" name="sms" value="1">
+                                {Lang::T('SMS')}</label>
+                            <label class="col-md-2 control-label"><input type="checkbox" name="wa" value="1">
+                                {Lang::T('WA')}</label>
+                            <label class="col-md-2 control-label"><input type="checkbox" name="mail" value="1">
+                                {Lang::T('Email')}</label>
+                        </div>
+                    </div>
                 <input type="text" id="service_type" name="service_type" value="{if $routes['2'] eq 'pppoe'}PPPoE{else}hotspot{/if}" hidden>
             </div>
     <center>
@@ -94,5 +115,36 @@
         </div>
     </div>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var sendWelcomeCheckbox = document.getElementById('send_welcome_message');
+    var methodSection = document.getElementById('method');
 
+    function toggleMethodSection() {
+        if (sendWelcomeCheckbox.checked) {
+            methodSection.style.display = 'block';
+        } else {
+            methodSection.style.display = 'none';
+        }
+    }
+
+    toggleMethodSection();
+
+    sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
+    document.querySelector('form').addEventListener('submit', function(event) {
+        if (sendWelcomeCheckbox.checked) {
+            var methodCheckboxes = methodSection.querySelectorAll('input[type="checkbox"]');
+            var oneChecked = Array.from(methodCheckboxes).some(function(checkbox) {
+                return checkbox.checked;
+            });
+
+            if (!oneChecked) {
+                event.preventDefault();
+                alert('Please choose at least one method.');
+                methodSection.focus();
+            }
+        }
+    });
+});
+</script>
 {include file="sections/footer.tpl"}
