@@ -83,6 +83,21 @@
                             </select>
                         </div>
                     </div>
+                    
+                    {if $routes['2'] eq 'pppoe'}
+                        <div class="panel-heading">PPPoE Configuration</div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Remote IP <span class="label label-danger"
+                                        id="warning_ip"></span></label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
+                                        onkeyup="checkIP(this, 0)" placeholder="Remote IP">
+                                    <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
                     <div class="panel-heading"></div>
                     <div class="panel-body">
                         <div class="form-group">
