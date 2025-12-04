@@ -27,9 +27,13 @@
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
         $password = trim(_post('password'));
+        
+        // START MODIFIKASI: Menangkap data PPPoE fields
         $pppoe_username = trim(_post('pppoe_username'));
         $pppoe_password = trim(_post('pppoe_password'));
-        $pppoe_ip = trim(_post('pppoe_ip'));
+        $pppoe_ip = trim(_post('pppoe_ip')); // <-- Menangkap Remote IP
+        // END MODIFIKASI
+        
         $email = _post('email');
         $address = _post('address');
         $ppln = _post('ppln');
@@ -61,6 +65,13 @@
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = $username;
             $d->password = $password;
+            
+            // START MODIFIKASI: Menyimpan data PPPoE fields ke database
+            $d->pppoe_username = $pppoe_username;
+            $d->pppoe_password = $pppoe_password;
+            $d->pppoe_ip = $pppoe_ip; // <-- Menyimpan Remote IP
+            // END MODIFIKASI
+            
             $d->email = $email;
             $d->account_type = $account_type;
             $d->fullname = $fullname;
