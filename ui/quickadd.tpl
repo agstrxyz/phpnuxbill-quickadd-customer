@@ -83,6 +83,38 @@
                             </select>
                         </div>
                     </div>
+                    
+                    {if $routes['2'] eq 'pppoe'}
+                        <div class="panel-heading">PPPoE Configuration</div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">{Lang::T('Usernames')} <span class="label label-danger"
+                                        id="warning_pppoe_username"></span></label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="pppoe_username" name="pppoe_username"
+                                        onkeyup="checkUsername(this, 0)" placeholder="{Lang::T('PPPoE Username')}">
+                                    <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">{Lang::T('Password')}</label>
+                                <div class="col-md-9">
+                                    <input type="password" class="form-control" id="pppoe_password" name="pppoe_password"
+                                        placeholder="{Lang::T('PPPoE Password')}" onmouseleave="this.type = 'password'"
+                                        onmouseenter="this.type = 'text'">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Remote IP <span class="label label-danger"
+                                        id="warning_ip"></span></label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
+                                        onkeyup="checkIP(this, 0)" placeholder="Remote IP">
+                                    <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
                     <div class="panel-heading"></div>
                     <div class="panel-body">
                         <div class="form-group">
@@ -115,36 +147,89 @@
         </div>
     </div>
 </form>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var sendWelcomeCheckbox = document.getElementById('send_welcome_message');
-    var methodSection = document.getElementById('method');
 
-    function toggleMethodSection() {
-        if (sendWelcomeCheckbox.checked) {
-            methodSection.style.display = 'block';
-        } else {
-            methodSection.style.display = 'none';
-        }
-    }
-
-    toggleMethodSection();
-
-    sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
-    document.querySelector('form').addEventListener('submit', function(event) {
-        if (sendWelcomeCheckbox.checked) {
-            var methodCheckboxes = methodSection.querySelectorAll('input[type="checkbox"]');
-            var oneChecked = Array.from(methodCheckboxes).some(function(checkbox) {
-                return checkbox.checked;
+{literal}
+    <script>
+        // Fungsi dari edit.tpl untuk validasi Username PPPoE (onkeyup)
+        function checkUsername(obj, id) {
+            var username = obj.value;
+            $.post(APP_URL + '/customers/checkUsername', {
+                username: username,
+                id: id
+            }).done(function(data) {
+                var warningSpan = document.getElementById('warning_pppoe_username');
+                if (data == 'true') {
+                    warningSpan.textContent = " {Lang::T('Username has been used')}";
+                    warningSpan.style.display = 'inline';
+                } else {
+                    warningSpan.textContent = "";
+                    warningSpan.style.display = 'none';
+                }
+            }).fail(function(e) {
+                console.log(e);
             });
-
-            if (!oneChecked) {
-                event.preventDefault();
-                alert('Please choose at least one method.');
-                methodSection.focus();
-            }
         }
-    });
-});
-</script>
+
+        // Fungsi dari edit.tpl untuk validasi Remote IP (onkeyup)
+        function checkIP(obj, id) {
+            var ip = obj.value;
+            $.post(APP_URL + '/customers/checkIP', {
+                ip: ip,
+                id: id
+            }).done(function(data) {
+                var warningSpan = document.getElementById('warning_ip');
+                if (data == 'true') {
+                    warningSpan.textContent = " {Lang::T('IP has been used')}";
+                    warningSpan.style.display = 'inline';
+                } else {
+                    warningSpan.textContent = "";
+                    warningSpan.style.display = 'none';
+                }
+            }).fail(function(e) {
+                console.log(e);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var sendWelcomeCheckbox = document.getElementById('send_welcome_message');
+            var methodSection = document.getElementById('method');
+
+            function toggleMethodSection() {
+                if (sendWelcomeCheckbox.checked) {
+                    methodSection.style.display = 'block';
+                } else {
+                    methodSection.style.display = 'none';
+                }
+            }
+
+            toggleMethodSection();
+
+            sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
+            document.querySelector('form').addEventListener('submit', function(event) {
+                if (sendWelcomeCheckbox.checked) {
+                    var methodCheckboxes = methodSection.querySelectorAll('input[type="checkbox"]');
+                    var oneChecked = Array.from(methodCheckboxes).some(function(checkbox) {
+                        return checkbox.checked;
+                    });
+
+                    if (!oneChecked) {
+                        event.preventDefault();
+                        alert('Please choose at least one method.');
+                        methodSection.focus();
+                    }
+                }
+                
+                // Pengecekan tambahan: jika ada warning IP atau Username PPPoE
+                var warningIp = document.getElementById('warning_ip');
+                var warningPppoeUsername = document.getElementById('warning_pppoe_username');
+
+                if ((warningIp && warningIp.textContent.trim() !== "") || (warningPppoeUsername && warningPppoeUsername.textContent.trim() !== "")) {
+                    event.preventDefault();
+                    alert('Please fix the warnings for PPPoE Username or Remote IP before continuing.');
+                }
+            });
+        });
+    </script>
+{/literal}
+
 {include file="sections/footer.tpl"}
