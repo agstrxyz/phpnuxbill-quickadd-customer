@@ -20,10 +20,15 @@
 		if ($routes['3'] == 'pppoe') {
             $rdrct = '/pppoe';
         }
-        $csrf_token = _post('csrf_token');
-        if (!Csrf::check($csrf_token)) {
-            r2(U . 'plugin/quickadd'.$rdrct, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
-        }
+        
+        // --- BLOK CSRF TOKEN TELAH DIHAPUS ---
+        // Baris berikut yang dihapus:
+        // $csrf_token = _post('csrf_token');
+        // if (!Csrf::check($csrf_token)) {
+        //     r2(U . 'plugin/quickadd'.$rdrct, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        // }
+        // ------------------------------------
+        
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
         $password = trim(_post('password'));

@@ -1,7 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}plugin/quickadd/add{if $routes['2'] == 'pppoe'}/pppoe{/if}">
-    <input type="hidden" name="csrf_token" value="{$csrf_token}">
+<form class="form-horizontal" method="post" role="form" action="{$_url}plugin/quickadd/add{if $routes['2'] == 'pppoe'}/pppoe{/if}"> 
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">
