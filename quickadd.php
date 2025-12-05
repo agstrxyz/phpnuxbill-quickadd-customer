@@ -140,4 +140,4 @@
 	}
 		
 	$ui->display('quickadd.tpl');
-}
+} 
