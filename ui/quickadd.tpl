@@ -82,6 +82,19 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Using')}</label>
+                        <div class="col-md-9">
+                            <select name="using" class="form-control">
+                                {foreach $usings as $using}
+                                    <option value="{trim($using)}">{trim(ucWords($using))}</option>
+                                {/foreach}
+                                {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                                    <option value="Recharge Zero">{$_c['currency_code']} 0</option>
+                                {/if}
+                            </select>
+                        </div>
+                    </div>
                     
                     {if $routes['2'] eq 'pppoe'}
                         <div class="panel-heading">PPPoE Configuration</div>
@@ -92,7 +105,6 @@
                                 <div class="col-md-9">
                                     <input type="text" class="form-control" id="pppoe_username" name="pppoe_username"
                                         onkeyup="checkUsername(this, 0)" placeholder="{Lang::T('PPPoE Username')}">
-                                    <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -109,7 +121,6 @@
                                 <div class="col-md-9">
                                     <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
                                         onkeyup="checkIP(this, 0)" placeholder="Remote IP">
-                                    <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                                 </div>
                             </div>
                         </div>

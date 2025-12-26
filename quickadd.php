@@ -3,7 +3,7 @@
 
  function quickadd()
 {
-	global $ui,$routes;
+	global $ui,$routes,$config;
 	_admin();
     $ui->assign('_system_menu', 'quickadd');
     $admin = Admin::_info();
@@ -16,6 +16,15 @@
 	}
     $plans = ORM::for_table('tbl_plans')->where('type', $pltype)->where('enabled', 1)->find_many();
     $ui->assign('plans', $plans);
+	if ($using == 'Recharge Zero') {
+        $zero = 1;
+    }
+    $usings = explode(',', $config['payment_usings']);
+    $usings = array_filter(array_unique($usings));
+    if (count($usings) == 0) {
+        $usings[] = Lang::T('Cash');
+    }
+	$ui->assign('usings', $usings);
 	if ($routes['2'] == 'add') {
 		if ($routes['3'] == 'pppoe') {
             $rdrct = '/pppoe';
@@ -46,6 +55,7 @@
         $service_type = _post('service_type');
         $account_type = 'Personal';
         $city = _post('city');
+		$using = _post('using');
 
         run_hook('add_customer'); #HOOK
         $msg = '';
@@ -66,6 +76,7 @@
         if ($d) {
             $msg .= Lang::T('Account already axist') . '<br>';
         }
+			
         if ($msg == '') {
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = $username;
@@ -92,7 +103,7 @@
                 $server = 'Radius';
             }
             //recharge new customer
-            Package::rechargeUser($d['id'], $server, $plan['id'], 'Cash', $admin['fullname']);
+            Package::rechargeUser($d['id'], $server, $plan['id'], $using, $admin['fullname']);
             // Send welcome message
             if (isset($_POST['send_welcome_message']) && $_POST['send_welcome_message'] == true) {
                 $welcomeMessage = Lang::getNotifText('welcome_message');
