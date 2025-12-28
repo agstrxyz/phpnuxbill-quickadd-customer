@@ -82,6 +82,36 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Payment Method')}</label>
+                        <div class="col-md-9">
+                            <select class="form-control select2"
+								name="using" style="width: 100%" data-placeholder="{Lang::T('Select Method')}...">
+                                {foreach $usings as $using}
+                                    <option value="{trim($using)}">{trim(ucWords($using))}</option>
+                                {/foreach}
+                                {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                                    <option value="Recharge Zero">{$_c['currency_code']} 0</option>
+                                {/if}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Expired Date')}</label>
+                        <div class="col-md-9">
+                            <input type="hidden" name="custom_field_name[]" value="Expired Date" />
+							<input type="text" id="custom_field_value[]" name="custom_field_value[]" class="form-control" placeholder="20" />
+							<span class="help-block">{Lang::T('Use for custom expired date postpaid plan.')}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Activation Fee')}</label>
+                        <div class="col-md-9">
+                            <input type="hidden" name="custom_field_name[]" value="Activation Bill" />
+							<input type="text" id="custom_field_value[]" name="custom_field_value[]" class="form-control" placeholder="350000:1" />
+							<span class="help-block">{Lang::T('Use code ":0" for postpaid customers to avoid re-billing.')}</span>
+                        </div>
+                    </div>
                     
                     {if $routes['2'] eq 'pppoe'}
                         <div class="panel-heading">PPPoE Configuration</div>
@@ -92,7 +122,6 @@
                                 <div class="col-md-9">
                                     <input type="text" class="form-control" id="pppoe_username" name="pppoe_username"
                                         onkeyup="checkUsername(this, 0)" placeholder="{Lang::T('PPPoE Username')}">
-                                    <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -109,7 +138,6 @@
                                 <div class="col-md-9">
                                     <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
                                         onkeyup="checkIP(this, 0)" placeholder="Remote IP">
-                                    <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                                 </div>
                             </div>
                         </div>

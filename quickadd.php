@@ -3,7 +3,7 @@
 
  function quickadd()
 {
-	global $ui,$routes;
+	global $ui,$routes,$config, $zero;
 	_admin();
     $ui->assign('_system_menu', 'quickadd');
     $admin = Admin::_info();
@@ -16,29 +16,26 @@
 	}
     $plans = ORM::for_table('tbl_plans')->where('type', $pltype)->where('enabled', 1)->find_many();
     $ui->assign('plans', $plans);
+    
+    $zero = 0;
+    $usings = explode(',', $config['payment_usings']);
+    $usings = array_filter(array_unique($usings));
+    if (count($usings) == 0) {
+        $usings[] = Lang::T('Cash');
+    }
+	$ui->assign('usings', $usings);
+
 	if ($routes['2'] == 'add') {
 		if ($routes['3'] == 'pppoe') {
             $rdrct = '/pppoe';
         }
         
-        // --- BLOK CSRF TOKEN TELAH DIHAPUS ---
-        // Baris berikut yang dihapus:
-        // $csrf_token = _post('csrf_token');
-        // if (!Csrf::check($csrf_token)) {
-        //     r2(U . 'plugin/quickadd'.$rdrct, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
-        // }
-        // ------------------------------------
-        
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
         $password = trim(_post('password'));
-        
-        // START MODIFIKASI: Menangkap data PPPoE fields
         $pppoe_username = trim(_post('pppoe_username'));
         $pppoe_password = trim(_post('pppoe_password'));
-        $pppoe_ip = trim(_post('pppoe_ip')); // <-- Menangkap Remote IP
-        // END MODIFIKASI
-        
+        $pppoe_ip = trim(_post('pppoe_ip')); 
         $email = _post('email');
         $address = _post('address');
         $ppln = _post('ppln');
@@ -46,6 +43,15 @@
         $service_type = _post('service_type');
         $account_type = 'Personal';
         $city = _post('city');
+		$using = _post('using');
+		
+        if ($using == 'Recharge Zero') {
+            $zero = 1;
+        }
+        
+		//post Customers Attributes
+        $custom_field_names = (array) $_POST['custom_field_name'];
+        $custom_field_values = (array) $_POST['custom_field_value'];
 
         run_hook('add_customer'); #HOOK
         $msg = '';
@@ -66,17 +72,14 @@
         if ($d) {
             $msg .= Lang::T('Account already axist') . '<br>';
         }
+			
         if ($msg == '') {
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = $username;
             $d->password = $password;
-            
-            // START MODIFIKASI: Menyimpan data PPPoE fields ke database
             $d->pppoe_username = $pppoe_username;
             $d->pppoe_password = $pppoe_password;
-            $d->pppoe_ip = $pppoe_ip; // <-- Menyimpan Remote IP
-            // END MODIFIKASI
-            
+            $d->pppoe_ip = $pppoe_ip;
             $d->email = $email;
             $d->account_type = $account_type;
             $d->fullname = $fullname;
@@ -91,8 +94,30 @@
             if ($plan['is_radius'] == '1') {
                 $server = 'Radius';
             }
+			
+			// Retrieve the customer ID of the newly created customer
+            $customerId = $d->id();
+            // Save Customers Attributes details
+            if (!empty($custom_field_values)) {
+                $totalFields = min(count($custom_field_names), count($custom_field_values));
+                for ($i = 0; $i < $totalFields; $i++) {
+                    $name = $custom_field_names[$i];
+                    $value = $custom_field_values[$i];
+
+                    if (!empty($value)) {
+                        $customField = ORM::for_table('tbl_customers_fields')->create();
+                        $customField->customer_id = $customerId;
+                        $customField->field_name = $name;
+                        $customField->field_value = $value;
+                        $customField->save();
+                    }
+                }
+            }
             //recharge new customer
-            Package::rechargeUser($d['id'], $server, $plan['id'], 'Cash', $admin['fullname']);
+			$gateway = $using;
+            if (Package::rechargeUser($d['id'], $server, $plan['id'], $gateway, $admin['fullname'])) {
+				list($bills, $add_cost) = User::getBills($d['id']);
+			}
             // Send welcome message
             if (isset($_POST['send_welcome_message']) && $_POST['send_welcome_message'] == true) {
                 $welcomeMessage = Lang::getNotifText('welcome_message');
@@ -127,12 +152,13 @@
                         try {
                             call_user_func_array($message['method'], $message['args']);
                         } catch (Exception $e) {
-                            // Log the error and handle the failure
+                            // Log the error dan handle the failure
                             _log("Failed to send welcome message via $channel: " . $e->getMessage());
                         }
                     }
                 }
             }
+            unset($zero); // Membersihkan variabel global $zero setelah digunakan. Ini sudah BENAR.
             r2(U . 'customers/view/'.$d['id'], 's', Lang::T('Account Created Successfully'));
         } else {
             r2(U . "plugin/quickadd".$rdrct, 'e', $msg);
