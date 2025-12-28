@@ -83,9 +83,10 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Using')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Payment Method')}</label>
                         <div class="col-md-9">
-                            <select name="using" class="form-control">
+                            <select class="form-control select2"
+								name="using" style="width: 100%" data-placeholder="{Lang::T('Select Method')}...">
                                 {foreach $usings as $using}
                                     <option value="{trim($using)}">{trim(ucWords($using))}</option>
                                 {/foreach}
@@ -93,6 +94,22 @@
                                     <option value="Recharge Zero">{$_c['currency_code']} 0</option>
                                 {/if}
                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Expired Date')}</label>
+                        <div class="col-md-9">
+                            <input type="hidden" name="custom_field_name[]" value="Expired Date" />
+							<input type="text" id="custom_field_value[]" name="custom_field_value[]" class="form-control" placeholder="20" />
+							<span class="help-block">{Lang::T('Use for custom expired date postpaid plan.')}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Activation Fee')}</label>
+                        <div class="col-md-9">
+                            <input type="hidden" name="custom_field_name[]" value="Activation Bill" />
+							<input type="text" id="custom_field_value[]" name="custom_field_value[]" class="form-control" placeholder="350000:1" />
+							<span class="help-block">{Lang::T('Use code ":0" for postpaid customers to avoid re-billing.')}</span>
                         </div>
                     </div>
                     
